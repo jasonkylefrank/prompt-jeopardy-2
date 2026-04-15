@@ -6,7 +6,7 @@ This document is meant to provide technical instructions to a code-generating LL
 
 Next.js should be used for both server-side route handling and frontend code (including frontend routing).  As such, Express.js should not be needed.
 
-#### *** Structure the application as a "single-page app" which can be deployed as a "static website" ***
+#### ** Structure the application as a "single-page app" which can be deployed as a "static website" **
 
 Although the application will have dynamic URL aspects (such as a generated game ID), structure the code such that the entire application can be deployed to simple static site hosting platforms.  This should allow the game to be run without needing to host it on a server that runs a node.js backend.
 
