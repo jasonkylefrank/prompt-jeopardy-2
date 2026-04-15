@@ -1,18 +1,25 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { db } from '../../../firebase';
-import { ref, get, query, orderByChild, equalTo } from 'firebase/database';
+import { ref, get, query, orderByChild, equalTo, push, set } from 'firebase/database';
 import { debounce } from 'lodash';
+import { useParams } from 'next/navigation';
+
+// This allows us to use a single-page application (static export) and satisfies the 'output: export' requirement
+export function generateStaticParams() {
+  return [{ slug: [''] }]; 
+}
 
 const CUTE_ANIMALS = ['🦁', '🐯', '🐻', '🐼', '🦊', '🐨', '🐒', '🦛', '🦒', '🦓'];
 
-export default function JoinSpecificGamePage() {
-  const router = useRouter();
+export default function JoinClientPage() {
   const params = useParams();
-  const { gameId } = params;
+  const router = useRouter();
+  const gameIdFromUrl = params.slug ? params.slug[0] : null;
 
+  const [gameIdInput, setGameIdInput] = useState('');
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,10 +27,15 @@ export default function JoinSpecificGamePage() {
   const [isNameUnique, setIsNameUnique] = useState(true);
   const [gameExists, setGameExists] = useState(false);
 
+  const gameId = gameIdFromUrl || gameIdInput;
+
   useEffect(() => {
     const checkGame = async () => {
-      if (!gameId) return;
-      const gameRef = ref(db, `games/${gameId}`);
+      if (!gameIdFromUrl) {
+        setIsLoading(false);
+        return;
+      }
+      const gameRef = ref(db, `games/${gameIdFromUrl}`);
       const snapshot = await get(gameRef);
       if (snapshot.exists()) {
         setGameExists(true);
@@ -33,10 +45,10 @@ export default function JoinSpecificGamePage() {
       setIsLoading(false);
     };
     checkGame();
-  }, [gameId]);
+  }, [gameIdFromUrl]);
 
   const checkNameUniqueness = useCallback(debounce(async (name) => {
-    if (!name) {
+    if (!name || !gameId) {
       setIsNameUnique(true);
       setIsNameChecking(false);
       return;
@@ -52,6 +64,10 @@ export default function JoinSpecificGamePage() {
   useEffect(() => {
     checkNameUniqueness(name);
   }, [name, checkNameUniqueness]);
+
+  const handleFindGame = () => {
+    router.push(`/join/${gameIdInput}`);
+  };
 
   const handleJoinGame = async (e) => {
     e.preventDefault();
@@ -92,12 +108,33 @@ export default function JoinSpecificGamePage() {
     }
   };
 
-  if (isLoading && !gameExists) {
-    return <div className="flex justify-center items-center min-h-screen">Verifying game...</div>;
+  if (isLoading) {
+    return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
-  if (!gameExists) {
+  if (gameIdFromUrl && !gameExists) {
     return <div className="text-red-500 p-8 text-center">{error || 'Game not found.'}</div>;
+  }
+
+  if (!gameIdFromUrl) {
+    return (
+      <div style={{ padding: '20px', maxWidth: '400px', margin: 'auto' }}>
+        <h1>Find a Game to Join</h1>
+        <p>Please enter the Game ID provided by the host.</p>
+        <div style={{ margin: '10px 0' }}>
+          <input
+            type="text"
+            value={gameIdInput}
+            onChange={(e) => setGameIdInput(e.target.value)}
+            placeholder="Enter Game ID"
+            style={{ width: '100%', padding: '8px' }}
+          />
+        </div>
+        <button onClick={handleFindGame} style={{ width: '100%', padding: '10px' }}>
+          Find Game
+        </button>
+      </div>
+    );
   }
 
   return (

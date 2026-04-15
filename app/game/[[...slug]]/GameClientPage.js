@@ -1,12 +1,18 @@
 'use client';
 
-import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
 import { ref, onValue, set, runTransaction } from 'firebase/database';
+import { useParams } from 'next/navigation';
 
-export default function GamePage() {
-  const { gameId } = useParams();
+// This allows us to use a single-page application (static export) and satisfies the 'output: export' requirement
+export function generateStaticParams() {
+  return [{ slug: [''] }]; 
+}
+
+export default function GameClientPage() {
+  const params = useParams();
+  const gameId = params.slug ? params.slug[0] : null;
   const [player, setPlayer] = useState({ id: null, name: '' });
   const [gameState, setGameState] = useState(null);
   const [currentQuestion, setCurrentQuestion] = useState('');

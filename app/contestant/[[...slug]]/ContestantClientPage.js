@@ -1,12 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { db } from '../../../firebase';
 import { ref, get } from 'firebase/database';
 
-export default function ContestantPage({ params }) {
-  const { contestantId } = params;
+// This allows us to use a single-page application (static export) and satisfies the 'output: export' requirement
+export function generateStaticParams() {
+  return [{ slug: [''] }]; 
+}
+
+export default function ContestantClientPage() {
+  const params = useParams();
+  const contestantId = params.slug ? params.slug[0] : null;
   const searchParams = useSearchParams();
   const gameId = searchParams.get('game');
 

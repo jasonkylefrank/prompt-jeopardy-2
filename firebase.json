@@ -1,5 +1,26 @@
 {
   "database": {
     "rules": "database.rules.json"
+  },
+  "hosting": {
+    "public": "out",
+    "rewrites": [
+      {
+        "source": "/game/**",
+        "destination": "/game/index.html"
+      },
+      {
+        "source": "/join/**",
+        "destination": "/join/index.html"
+      },
+      {
+        "source": "/contestant/**",
+        "destination": "/contestant/index.html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
   }
 }
