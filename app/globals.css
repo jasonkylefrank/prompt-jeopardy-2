@@ -1,3 +1,12 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-mystery-dark: #0f172a;
+  --color-mystery-indigo: #1e1b4b;
+  --color-mystery-violet: #2e1065;
+  --color-mystery-cyan: #22d3ee;
+  --color-mystery-pink: #f472b6;
+
+  --font-outfit: var(--font-outfit), sans-serif;
+  --font-inter: var(--font-inter), sans-serif;
+}

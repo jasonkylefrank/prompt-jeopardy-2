@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { db } from '../../../firebase';
 import { ref, onValue, set, runTransaction } from 'firebase/database';
 import { useParams } from 'next/navigation';
+import Card from '../../components/Card';
+import Button from '../../components/Button';
+import Input from '../../components/Input';
 
 // This allows us to use a single-page application (static export) and satisfies the 'output: export' requirement
 export function generateStaticParams() {
@@ -76,67 +79,112 @@ export default function GameClientPage() {
   const isMyTurn = gameState?.currentQuerent === player.id;
 
   const renderPlayerList = () => (
-    <ul>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
         {gameState?.players && Object.values(gameState.players).map((p, i) => (
-            <li key={i} style={{fontWeight: gameState.currentQuerent === Object.keys(gameState.players)[i] ? 'bold' : 'normal'}}>
-                {p.name}: {p.score} (Abstains: {p.abstainCount || 0})
-            </li>
+            <Card key={i} className={`p-4 ${gameState.currentQuerent === Object.keys(gameState.players)[i] ? 'border-mystery-cyan' : ''}`}>
+                <div className="flex justify-between items-center">
+                  <span className="font-bold text-lg text-white">{p.name}</span>
+                  <span className="text-mystery-pink font-bold">Score: {p.score}</span>
+                </div>
+                <div className="text-sm text-slate-400 mt-2">Abstains: {p.abstainCount || 0}</div>
+            </Card>
         ))}
-    </ul>
+    </div>
   );
 
   const renderQuestionPhase = () => (
-    <div>
-        <h2>{isMyTurn ? "It's your turn to ask!" : `Waiting for ${gameState?.players[gameState?.currentQuerent]?.name} to ask...`}</h2>
+    <Card className="p-6 my-6">
+        <h2 className="text-2xl font-bold font-outfit mb-4 text-mystery-cyan">
+          {isMyTurn ? "It's your turn to ask!" : `Waiting for ${gameState?.players[gameState?.currentQuerent]?.name} to ask...`}
+        </h2>
         {isMyTurn ? (
-            <form onSubmit={e => { e.preventDefault(); handleAskQuestion(); }}>
-                <input 
+            <form onSubmit={e => { e.preventDefault(); handleAskQuestion(); }} className="flex flex-col gap-4">
+                <Input 
                     type="text" 
                     value={currentQuestion} 
                     onChange={e => handleQuestionChange(e.target.value)} 
-                    placeholder="Type your question here..." 
-                    style={{width: '80%', padding: '8px'}}
+                    placeholder="Type your question here to ascertain the persona..." 
                 />
-                <button type="submit">Ask LLM</button>
+                <Button type="submit" variant="primary" className="self-end">Ask LLM</Button>
             </form>
         ) : (
-            <p style={{fontStyle: 'italic', background: '#eee', padding: '1em'}}>Question being typed: "{currentQuestion}"</p>
+            <p className="italic bg-slate-900/60 p-4 border border-white/5 rounded-lg text-slate-300">
+              Question being typed: "{currentQuestion}"
+            </p>
         )}
-    </div>
+    </Card>
   );
 
   const renderAnsweringPhase = () => (
-    <div>
-      <h2>The LLM Responds:</h2>
-      <p style={{ fontStyle: 'italic', background: '#f0f0f0', padding: '1em' }}>{gameState.llmResponse}</p>
-      <hr />
-      <h3>What is the LLM's Persona and Action?</h3>
-      <div>
-        <select value={myGuess.persona} onChange={e => setMyGuess({...myGuess, persona: e.target.value})}>
-          <option value="">-- Select a Persona --</option>
-          {gameState.roundConfig.personaPool.map(p => <option key={p} value={p}>{p}</option>)}
-        </select>
-        <select value={myGuess.action} onChange={e => setMyGuess({...myGuess, action: e.target.value})} style={{marginLeft: '1em'}}>
-          <option value="">-- Select an Action --</option>
-          {gameState.roundConfig.actionPool.map(a => <option key={a} value={a}>{a}</option>)}
-        </select>
+    <Card className="p-6 my-6 border-mystery-pink/30">
+      <h2 className="text-2xl font-bold font-outfit mb-4 text-mystery-pink">The AI Agent Responds:</h2>
+      <p className="italic bg-slate-900/60 p-6 border border-white/5 rounded-lg text-slate-200 text-lg leading-relaxed shadow-inner">
+        {gameState.llmResponse}
+      </p>
+      
+      <div className="mt-8 pt-8 border-t border-white/10">
+        <h3 className="text-xl font-bold text-white mb-6">What is the LLM's Persona and Action?</h3>
+        <div className="flex flex-col sm:flex-row gap-6 mb-8">
+          <div className="w-full">
+            <label className="text-sm font-medium text-mystery-cyan mb-2 block">Guessed Persona</label>
+            <select 
+              className="w-full bg-slate-900 border border-white/20 rounded-lg p-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-mystery-cyan"
+              value={myGuess.persona} 
+              onChange={e => setMyGuess({...myGuess, persona: e.target.value})}
+            >
+              <option value="">-- Select a Persona --</option>
+              {gameState.roundConfig.personaPool.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </div>
+          <div className="w-full">
+            <label className="text-sm font-medium text-mystery-pink mb-2 block">Guessed Action</label>
+            <select 
+              className="w-full bg-slate-900 border border-white/20 rounded-lg p-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-mystery-pink"
+              value={myGuess.action} 
+              onChange={e => setMyGuess({...myGuess, action: e.target.value})}
+            >
+              <option value="">-- Select an Action --</option>
+              {gameState.roundConfig.actionPool.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+          </div>
+        </div>
+        
+        <div className="flex gap-4">
+          <Button onClick={() => submitGuess(false)} variant="primary" className="flex-1">Submit Guess</Button>
+          <Button onClick={() => submitGuess(true)} variant="outline">Abstain</Button>
+        </div>
       </div>
-      <button onClick={() => submitGuess(false)} style={{marginTop: '1em'}}>Submit Guess</button>
-      <button onClick={() => submitGuess(true)} style={{marginLeft: '1em'}}>Abstain</button>
-    </div>
+    </Card>
   );
   
-  if (!player.id) { /* Join Game screen */ }
+  if (!player.id) { 
+    // Join Game screen (legacy fallback)
+    return (
+      <div className="max-w-md mx-auto mt-20">
+        <Card className="p-8">
+          <form onSubmit={handleJoinGame} className="flex flex-col gap-4">
+            <Input name="playerName" placeholder="Enter name" label="Your Name" />
+            <Button type="submit" variant="primary">Join</Button>
+          </form>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h1>Prompt Jeopardy!</h1>
-      <p>Welcome, {player.name}! (Game ID: {gameId})</p>
+    <div className="max-w-4xl mx-auto py-8 px-4 animate-in fade-in duration-500">
+      <div className="flex justify-between items-center mb-8 border-b border-white/10 pb-6">
+        <h1 className="text-4xl font-black font-outfit text-white tracking-wider">Prompt Jeopardy</h1>
+        <div className="text-right">
+          <p className="text-mystery-cyan font-bold">Agent: {player.name}</p>
+          <p className="text-slate-500 text-sm font-mono">Session ID: {gameId}</p>
+        </div>
+      </div>
+      
       {renderPlayerList()}
-      <hr />
+      
       {gameState?.gameState === 'STARTED' && renderQuestionPhase()}
       {gameState?.gameState === 'ANSWERING' && renderAnsweringPhase()}
-      {/* A screen for when you have submitted but others haven't could go here */}
     </div>
   );
 }
