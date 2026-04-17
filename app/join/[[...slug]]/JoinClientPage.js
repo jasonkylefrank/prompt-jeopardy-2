@@ -110,7 +110,8 @@ export default function JoinClientPage() {
         score: 0,
       };
       await set(newPlayerRef, newContestant);
-
+      
+      localStorage.setItem('contestantId', newContestant.id);
       router.push(`/contestant/${newContestant.id}?game=${gameId}`);
 
     } catch (err) {
