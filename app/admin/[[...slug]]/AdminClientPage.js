@@ -9,6 +9,7 @@ import Button from '../../components/Button';
 import Avatar from '../../components/Avatar';
 import GpsFixedIcon from '../../components/icons/GpsFixedIcon';
 import GpsNotFixedIcon from '../../components/icons/GpsNotFixedIcon';
+import Tooltip from '../../components/Tooltip';
 
 // Default pools that can be customized by the admin
 const PERSONA_POOL = {
@@ -266,13 +267,14 @@ export default function AdminPage() {
                                 </span>
                               </label>
                               {isSelected && (
-                                <button
-                                  onClick={() => setSecretPersona(p)}
-                                  className={`ml-2 w-8 h-8 shrink-0 flex items-center justify-center rounded-full transition-all`}
-                                  title="Set as Secret Persona"
-                                >
-                                  {isSecret ? <GpsFixedIcon className="w-6 h-6 text-mystery-cyan drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" /> : <GpsNotFixedIcon className="w-6 h-6 text-gray-500 hover:text-white" />}
-                                </button>
+                                <Tooltip text="Toggle secret persona" position="top">
+                                  <button
+                                    onClick={() => setSecretPersona(p)}
+                                    className={`ml-2 w-8 h-8 shrink-0 flex items-center justify-center rounded-full transition-all cursor-pointer`}
+                                  >
+                                    {isSecret ? <GpsFixedIcon className="w-6 h-6 text-mystery-cyan drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]" /> : <GpsNotFixedIcon className="w-6 h-6 text-gray-500 hover:text-white" />}
+                                  </button>
+                                </Tooltip>
                               )}
                             </div>
                           );
@@ -338,13 +340,14 @@ export default function AdminPage() {
                           </span>
                         </label>
                         {isSelected && (
-                          <button
-                            onClick={() => setSecretAction(a)}
-                            className={`ml-3 mt-0.5 w-8 h-8 shrink-0 flex items-center justify-center rounded-full transition-all`}
-                            title="Set as Secret Action"
-                          >
-                            {isSecret ? <GpsFixedIcon className="w-6 h-6 text-mystery-pink drop-shadow-[0_0_8px_rgba(244,114,182,0.8)]" /> : <GpsNotFixedIcon className="w-6 h-6 text-gray-500 hover:text-white" />}
-                          </button>
+                          <Tooltip text="Toggle secret action" position="left">
+                            <button
+                              onClick={() => setSecretAction(a)}
+                              className={`ml-3 mt-0.5 w-8 h-8 shrink-0 flex items-center justify-center rounded-full transition-all cursor-pointer`}
+                            >
+                              {isSecret ? <GpsFixedIcon className="w-6 h-6 text-mystery-pink drop-shadow-[0_0_8px_rgba(244,114,182,0.8)]" /> : <GpsNotFixedIcon className="w-6 h-6 text-gray-500 hover:text-white" />}
+                            </button>
+                          </Tooltip>
                         )}
                       </div>
                     );

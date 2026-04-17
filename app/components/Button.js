@@ -1,5 +1,5 @@
 export default function Button({ children, onClick, disabled, variant = 'primary', className = '', type = 'button', ...props }) {
-  const baseStyles = "px-6 py-3 rounded-lg font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed";
+  const baseStyles = "px-6 py-3 rounded-lg font-bold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-900 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer";
   
   const variants = {
     primary: "bg-mystery-cyan text-slate-900 hover:bg-cyan-300 focus:ring-mystery-cyan hover:shadow-[0_0_15px_rgba(34,211,238,0.5)]",
