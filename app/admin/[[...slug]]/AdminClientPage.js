@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { db } from '../../../firebase';
 import { ref, onValue, update } from 'firebase/database';
+import { useAuth } from '../../components/AuthProvider';
 
 // Local Components
 import Setup from '../components/Setup';
@@ -37,6 +38,7 @@ export default function AdminPage() {
   const params = useParams();
   const gameId = params.slug ? params.slug[0] : null;
   const gameUrl = typeof window !== 'undefined' ? `${window.location.origin}/join/${gameId}` : '';
+  const { user } = useAuth();
 
   // Setup state
   const [personaCount, setPersonaCount] = useState(6);
@@ -385,6 +387,17 @@ export default function AdminPage() {
 
   const { round, phase, mode } = parseState();
   const isSetup = gameState === 'SETUP' || gameState === 'ROUND_2_SETUP';
+  const isAuthorized = user?.uid === gameData?.hostUid;
+
+  if (gameData && !isAuthorized) {
+    return (
+      <div className="max-w-2xl mx-auto mt-20 p-8 border-2 border-dashed border-red-500/20 rounded-3xl text-center bg-red-900/5">
+        <h2 className="text-2xl font-black text-red-400 uppercase tracking-widest mb-4">Access Denied</h2>
+        <p className="text-slate-400 italic">You are not the designated Host for this mission. Administrative credentials are required.</p>
+        <button onClick={() => window.location.href = '/'} className="mt-8 px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full border border-red-500/20 transition-all font-bold">Return to Base</button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto py-8 px-4 font-inter text-slate-200">

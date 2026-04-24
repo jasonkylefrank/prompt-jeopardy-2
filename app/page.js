@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { db } from '../firebase';
 import { ref, push, set } from 'firebase/database';
+import { useAuth } from './components/AuthProvider';
 
 import Button from './components/Button';
 
 export default function HomePage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
 
   const handleCreateGame = async () => {
@@ -17,6 +19,7 @@ export default function HomePage() {
       const newGameRef = push(ref(db, 'games'));
       await set(newGameRef, {
         gameId: newGameRef.key,
+        hostUid: user?.uid,
         gameState: 'SETUP',
         players: {}
       });

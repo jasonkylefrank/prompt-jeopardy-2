@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, Suspense } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { db } from '../../../firebase';
 import { ref, onValue, update } from 'firebase/database';
+import { useAuth } from '../../components/AuthProvider';
 
 // Local Components
 import Header from '../components/Header';
@@ -28,6 +29,7 @@ function ContestantContent() {
   const searchParams = useSearchParams();
   const contestantId = params.slug ? params.slug[0] : null;
   const gameId = searchParams.get('game');
+  const { user } = useAuth();
   
   const [gameData, setGameData] = useState(null);
   const [contestants, setContestants] = useState({});
@@ -43,10 +45,8 @@ function ContestantContent() {
   const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false);
 
   useEffect(() => {
-    if (contestantId) {
-      localStorage.setItem('contestantId', contestantId);
-    }
-  }, [contestantId]);
+    // No longer using localStorage for ID tracking; auth.uid is the source of truth
+  }, []);
 
   useEffect(() => {
     if (!gameId || !contestantId) return;
@@ -177,10 +177,21 @@ function ContestantContent() {
   const currentQuerentName = currentQuerent?.name || 'Unknown';
   const isMyTurn = gameData?.currentQuerentId === contestantId;
   const gameState = gameData?.gameState || '';
+  const isAuthorized = user?.uid === contestantId;
 
   if (isLoading) return <div className="flex justify-center items-center h-[60vh] text-xl animate-pulse text-mystery-cyan font-black tracking-widest uppercase font-outfit">Loading Portal...</div>;
   if (error) return <div className="text-mystery-pink mt-8 p-4 bg-red-900/40 border border-mystery-pink/30 rounded-lg text-center max-w-md mx-auto">{error}</div>;
   if (!contestant) return <div className="text-center mt-8 text-slate-400">Agent record not found. Please re-brief.</div>;
+
+  if (!isAuthorized) {
+    return (
+      <div className="max-w-2xl mx-auto mt-20 p-8 border-2 border-dashed border-red-500/20 rounded-3xl text-center bg-red-900/5">
+        <h2 className="text-2xl font-black text-red-400 uppercase tracking-widest mb-4">Unauthorized Access</h2>
+        <p className="text-slate-400 italic">You are attempting to access another agent's secure portal. Interception is prohibited.</p>
+        <button onClick={() => window.location.href = '/'} className="mt-8 px-6 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-full border border-red-500/20 transition-all font-bold">Return to Base</button>
+      </div>
+    );
+  }
 
   // SETUP MODE
   if (gameState === 'SETUP' || gameState === 'ROUND_2_SETUP') {

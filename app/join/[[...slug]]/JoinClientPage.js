@@ -9,6 +9,7 @@ import { useParams } from 'next/navigation';
 import Card from '../../components/Card';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
+import { useAuth } from '../../components/AuthProvider';
 
 // This allows us to use a single-page application (static export) and satisfies the 'output: export' requirement
 export function generateStaticParams() {
@@ -20,6 +21,7 @@ const CUTE_ANIMALS = ['🦁', '🐯', '🐻', '🐼', '🦊', '🐨', '🐒', '�
 export default function JoinClientPage() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const gameIdFromUrl = params.slug ? params.slug[0] : null;
 
   const BrandingHeader = () => (
@@ -102,17 +104,17 @@ export default function JoinClientPage() {
         return;
       }
 
-      const newPlayerRef = push(playersRef);
+
+      const newPlayerRef = ref(db, `games/${gameId}/players/${user.uid}`);
       const newContestant = {
-        id: newPlayerRef.key,
+        id: user.uid,
         name: name.trim(),
         avatar: assignedAvatar,
         score: 0,
       };
       await set(newPlayerRef, newContestant);
       
-      localStorage.setItem('contestantId', newContestant.id);
-      router.push(`/contestant/${newContestant.id}?game=${gameId}`);
+      router.push(`/contestant/${user.uid}?game=${gameId}`);
 
     } catch (err) {
       console.error("Error joining game:", err);

@@ -1,5 +1,6 @@
 import './globals.css'
 import { Outfit, Inter } from 'next/font/google';
+import AuthProvider from './components/AuthProvider';
 
 const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -18,9 +19,11 @@ export default function RootLayout({ children }) {
        <body className="font-inter bg-slate-950 text-slate-200 min-h-screen relative overflow-x-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/40 via-violet-900/20 to-transparent -z-10 pointer-events-none" />
           <div className="relative z-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-full">
-            {children}
+            <AuthProvider>
+              {children}
+            </AuthProvider>
           </div>
        </body>
     </html>
-  )
+  );
 }
