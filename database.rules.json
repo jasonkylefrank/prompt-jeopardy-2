@@ -1,44 +1,32 @@
 {
   "rules": {
-    "//identity_model": "This ruleset requires Firebase Authentication (Anonymous, Google, etc.). It uses 'auth.uid' to distinguish between the Host and Contestants.",
     "games": {
       "$gameId": {
-        "//gameId": "GLOBAL READ: Anyone who knows the Game ID can read the mission status.",
         ".read": "true",
-        
-        "//hostUid": "GLOBAL WRITE (HOST): If you are the Host, you have authority over the entire game node. This eliminates the need to repeat the host check on every sub-field.",
         ".write": "data.child('hostUid').val() == auth.uid || !data.exists()",
 
         "hostUid": { 
-          "//hostUid_validate": "IMMUTABLE: hostUid should never change after creation.",
           ".validate": "!data.exists() && newData.exists()" 
         },
         "gameId": {
-          "//gameId_validate": "IMMUTABLE: gameId must match the path and never change.",
           ".validate": "!data.exists() && newData.exists() && newData.val() == $gameId"
         },
 
-        "//contestant_authority": "CONTESTANT ADDITIVE RULES: These rules apply ONLY if the user is NOT the host (since the host already has access above).",
-        
         "currentQuestion": {
-          "//currentQuestion_write": "Allow the designated querent to publish their question.",
           ".write": "data.parent().child('currentQuerentId').val() == auth.uid"
         },
         "questionStatus": {
-          "//questionStatus_write": "Allow the designated querent to update their typing status.",
           ".write": "data.parent().child('currentQuerentId').val() == auth.uid"
         },
         
         "players": {
           "$playerId": {
-             "//playerId_write": "Let a new player join if they are using their own authenticated UID.",
              ".write": "auth.uid == $playerId && !data.exists()"
           }
         },
         
         "submissions": {
           "$playerId": {
-            "//playerId_submission": "Let each agent submit their own guess anonymously.",
             ".write": "auth.uid == $playerId"
           }
         }
